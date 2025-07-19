@@ -1,6 +1,7 @@
 'use client'
 
 import type { ComponentProps } from 'react'
+import { useRef, useEffect } from 'react'
 
 import { useSearchParams } from 'next/navigation'
 import { twMerge } from 'tailwind-merge'
@@ -16,6 +17,7 @@ export type SelectProps = ComponentProps<'select'> & {
   variant?: 'primary'
   options: SelectOption[]
   placeholder?: string
+  autoFocusError?: boolean
 }
 
 const selectVariants = tv({
@@ -24,9 +26,6 @@ const selectVariants = tv({
     variant: {
       primary:
         'text-placeholder block w-full px-4 py-[5px] border-border border-[1px] rounded-lg focus:outline-none transition-colors text-sm bg-white placeholder-placeholder',
-    },
-    error: {
-      true: 'border-error-border focus:border-error-border border-[1px]',
     },
   },
   defaultVariants: {
@@ -43,11 +42,19 @@ export const Select = ({
   className,
   options,
   placeholder,
+  autoFocusError = false,
   ...props
 }: SelectProps) => {
   const searchParams = useSearchParams()
   const defaultValue = name ? searchParams?.get(name) || '' : ''
   const hasError = !!(error && error.length > 0)
+  const selectRef = useRef<HTMLSelectElement>(null)
+
+  useEffect(() => {
+    if (hasError && autoFocusError && selectRef.current) {
+      selectRef.current.focus()
+    }
+  }, [hasError, autoFocusError])
 
   return (
     <div className="mb-6">
@@ -57,10 +64,11 @@ export const Select = ({
         </label>
       )}
       <select
+        ref={selectRef}
         id={name}
         name={name}
         defaultValue={defaultValue}
-        className={twMerge(selectVariants({ variant, error: hasError }), className)}
+        className={twMerge(selectVariants({ variant }), className)}
         aria-invalid={hasError}
         aria-describedby={hasError ? `${name}-error` : undefined}
         {...props}

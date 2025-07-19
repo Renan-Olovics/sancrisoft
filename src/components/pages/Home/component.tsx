@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import { Button, Icon, Input, Link, Phone, Select } from '@/components/atoms'
 import { Stepper, Header } from '@/components/molecules'
 import { COMPANY_TYPES, STATES, COUNTRIES } from '@/constants/form'
@@ -15,6 +17,34 @@ export const Home = ({ params }: Props) => {
     1: undefined,
     2: 'In Progress',
     3: 'In Progress',
+  }
+
+  const errorObj = useMemo(() => {
+    if (!params.error) return {}
+    try {
+      return JSON.parse(decodeURIComponent(params.error))
+    } catch {
+      return {}
+    }
+  }, [params.error])
+
+  const step1Fields = [
+    'businessName',
+    'companyType',
+    'adressLine1',
+    'adressLine2',
+    'city',
+    'state',
+    'zip',
+  ]
+  const step2Fields = ['firstName', 'lastName', 'email', 'phone']
+
+  let firstErrorField: string | undefined
+  if (step === 1) {
+    firstErrorField = step1Fields.find((field) => errorObj[field])
+  }
+  if (step === 2) {
+    firstErrorField = step2Fields.find((field) => errorObj[field])
   }
 
   return (
@@ -43,12 +73,14 @@ export const Home = ({ params }: Props) => {
               type="text"
               placeholder="Registered business name"
               maxLength={255}
+              autoFocusError={firstErrorField === 'businessName'}
             />
             <Select
               label="Type"
               name="companyType"
               required={step === 1}
               options={COMPANY_TYPES.map((type) => ({ value: type, label: type }))}
+              autoFocusError={firstErrorField === 'companyType'}
             />
             <Input
               label="Address"
@@ -57,14 +89,22 @@ export const Home = ({ params }: Props) => {
               type="text"
               placeholder="Address line 1"
               maxLength={255}
+              autoFocusError={firstErrorField === 'adressLine1'}
             />
             <Input
               name="adressLine2"
               type="text"
               placeholder="Address line 2 (optional)"
               maxLength={255}
+              autoFocusError={firstErrorField === 'adressLine2'}
             />
-            <Input name="city" required={step === 1} type="text" placeholder="City" />
+            <Input
+              name="city"
+              required={step === 1}
+              type="text"
+              placeholder="City"
+              autoFocusError={firstErrorField === 'city'}
+            />
             <div className="flex gap-4">
               <Select
                 name="state"
@@ -75,6 +115,7 @@ export const Home = ({ params }: Props) => {
                 }))}
                 className="flex-1"
                 placeholder="State"
+                autoFocusError={firstErrorField === 'state'}
               />
               <Input
                 name="zip"
@@ -83,20 +124,31 @@ export const Home = ({ params }: Props) => {
                 placeholder="Zip"
                 className="flex-1"
                 maxLength={10}
+                autoFocusError={firstErrorField === 'zip'}
               />
             </div>
           </section>
 
           <section hidden={step !== 2} className="mb-[58px]">
-            <div className="flex items-end gap-4">
+            <div
+              className={`flex gap-4 ${errorObj.firstName || errorObj.lastName ? 'items-start' : 'items-end'}`}
+            >
               <Input
                 label="Name"
                 placeholder="First Name"
                 name="firstName"
                 required={step === 2}
                 type="text"
+                autoFocusError={firstErrorField === 'firstName'}
               />
-              <Input placeholder="Last Name" name="lastName" required={step === 2} type="text" />
+              <Input
+                label="&#xa0;"
+                placeholder="Last Name"
+                name="lastName"
+                required={step === 2}
+                type="text"
+                autoFocusError={firstErrorField === 'lastName'}
+              />
             </div>
             <Input
               label="Email"
@@ -104,8 +156,9 @@ export const Home = ({ params }: Props) => {
               name="email"
               required={step === 2}
               type="email"
+              autoFocusError={firstErrorField === 'email'}
             />
-            <Phone label="Phone" name="phone" />
+            <Phone label="Phone" name="phone" autoFocusError={firstErrorField === 'phone'} />
           </section>
 
           <section hidden={step !== 3} className="mb-10">

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
@@ -13,6 +13,7 @@ export type PhoneProps = {
   label?: string
   className?: string
   type?: string
+  autoFocusError?: boolean
 }
 
 const PLACEHOLDERS: Record<string, string> = {
@@ -33,6 +34,7 @@ export const Phone = ({
   label,
   className,
   type = 'tel',
+  autoFocusError = false,
 }: PhoneProps) => {
   const searchParams = useSearchParams()
   const phone = searchParams.get(name) || ''
@@ -54,6 +56,13 @@ export const Phone = ({
 
   const selectedCountryObj = COUNTRIES.find(({ name }) => name === selectedCountry) ?? COUNTRIES[0]
   const phoneCode = selectedCountryObj.phone_code
+
+  const inputRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (hasError && autoFocusError && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [hasError, autoFocusError])
 
   return (
     <div className={className}>
@@ -92,8 +101,11 @@ export const Phone = ({
           type={type}
           value={phoneValue}
           onChange={(e) => setPhoneValue(e.target.value)}
-          className="flex-1 border-0 bg-transparent text-base text-gray-700 outline-none"
+          className={
+            'focus-visible:outline-primary flex-1 border-0 bg-transparent text-base text-gray-700 outline-none'
+          }
           placeholder={PLACEHOLDERS[phoneCode] || ''}
+          ref={inputRef}
         />
       </div>
       {hasError && (

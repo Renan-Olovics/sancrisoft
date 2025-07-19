@@ -1,6 +1,7 @@
 'use client'
 
 import type { ComponentProps } from 'react'
+import { useRef, useEffect } from 'react'
 
 import { useSearchParams } from 'next/navigation'
 import { twMerge } from 'tailwind-merge'
@@ -11,6 +12,7 @@ import { Icon } from '@/components/atoms'
 export type InputProps = ComponentProps<'input'> & {
   label?: string
   variant?: 'primary'
+  autoFocusError?: boolean
 }
 
 const inputVariants = tv({
@@ -20,9 +22,6 @@ const inputVariants = tv({
       primary:
         'block w-full px-4 py-[5px] border-border border-[1px] rounded-lg focus:outline-none transition-colors text-sm bg-white placeholder-placeholder',
     },
-    error: {
-      true: 'border-error-border focus:border-error-border border-[1px]',
-    },
   },
   defaultVariants: {
     variant: 'primary',
@@ -30,7 +29,14 @@ const inputVariants = tv({
   },
 })
 
-export const Input = ({ label, name, variant = 'primary', className, ...props }: InputProps) => {
+export const Input = ({
+  label,
+  name,
+  variant = 'primary',
+  className,
+  autoFocusError = false,
+  ...props
+}: InputProps) => {
   const searchParams = useSearchParams()
   const paramValue = name ? searchParams?.get(name) : ''
   const defaultValue = paramValue ?? ''
@@ -44,6 +50,13 @@ export const Input = ({ label, name, variant = 'primary', className, ...props }:
   }
 
   const hasError = !!errorMsg
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (hasError && autoFocusError && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [hasError, autoFocusError])
 
   return (
     <div className="mb-6">
@@ -53,10 +66,11 @@ export const Input = ({ label, name, variant = 'primary', className, ...props }:
         </label>
       )}
       <input
+        ref={inputRef}
         id={name}
         name={name}
         defaultValue={defaultValue}
-        className={twMerge(inputVariants({ variant, error: hasError }), className)}
+        className={twMerge(inputVariants({ variant }), className)}
         aria-invalid={hasError}
         aria-describedby={hasError ? `${name}-error` : undefined}
         {...props}

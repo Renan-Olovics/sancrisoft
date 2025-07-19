@@ -28,7 +28,7 @@ export const step2Schema = z
     firstName: z.string().min(3, 'First name is required'),
     lastName: z.string().min(3, 'Last name is required'),
     email: z.email('Make sure your email is a well formed address'),
-    phone: z.string().min(5, 'Phone is required'),
+    phone: z.string(),
     country: z.string().optional(),
   })
   .superRefine((data, ctx) => {
@@ -46,7 +46,7 @@ export const step2Schema = z
     const regex = new RegExp(`^${regexStr}$`)
     if (!regex.test(phone)) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['phone'],
         message: `Phone number must match the format: ${mask}`,
       })

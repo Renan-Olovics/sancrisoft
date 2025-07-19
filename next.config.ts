@@ -3,6 +3,15 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+        pathname: '/wikipedia/**',
+      },
+    ],
+  },
   webpack: (config: any) => {
     const fileLoaderRule = config.module.rules.find((rule: any) => rule.test?.test?.('.svg'))
 

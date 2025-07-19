@@ -1,0 +1,7 @@
+export * from './Input/component'
+export * from './Icon/component'
+export * from './Select/component'
+export * from './Button/component'
+export * from './Phone/component'
+export * from './Tag/component'
+export * from './Link/component'
